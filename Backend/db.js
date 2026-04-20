@@ -9,24 +9,29 @@ const db = new sqlite3.Database("./recipe.db", (err) => {
   }
 });
 
-// Create tables if they do not exist
+db.run("PRAGMA foreign_keys = ON");
+
+// Create tables
 db.serialize(() => {
+  // USERS TABLE
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT,
-      password TEXT
+      username TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL
     )
   `);
 
+  // RECIPES TABLE
   db.run(`
     CREATE TABLE IF NOT EXISTS recipes (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      userId INTEGER,
-      title TEXT,
-      ingredients TEXT,
-      instructions TEXT,
-      category TEXT
+      userId INTEGER NOT NULL,
+      title TEXT NOT NULL,
+      ingredients TEXT NOT NULL,
+      instructions TEXT NOT NULL,
+      category TEXT,
+      FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
     )
   `);
 });

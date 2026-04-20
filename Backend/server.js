@@ -9,8 +9,10 @@ app.use(cors());
 app.use(bodyParser.json());
 
 const recipeRoutes = require("./routes/recipes");
+const authRoutes = require("./routes/auth");
 
 app.use("/api/recipes", recipeRoutes);
+app.use("/api/auth", authRoutes);
 
 app.listen(PORT, () => 
     {
