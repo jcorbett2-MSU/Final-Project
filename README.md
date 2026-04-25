@@ -1,18 +1,19 @@
-## Getting Started
+# Final Project - Recipe App
 
-Welcome to the VS Code Java world. Here is a guideline to help you get started to write Java code in Visual Studio Code.
+## Setup (Run these in seperate terminals!)
 
-## Folder Structure
+Backend:
+cd backend
+npm install
+npm run dev
 
-The workspace contains two folders by default, where:
+Frontend:
+cd frontend
+npm install
+npm run dev
 
-- `src`: the folder to maintain sources
-- `lib`: the folder to maintain dependencies
-
-Meanwhile, the compiled output files will be generated in the `bin` folder by default.
-
-> If you want to customize the folder structure, open `.vscode/settings.json` and update the related settings there.
-
-## Dependency Management
-
-The `JAVA PROJECTS` view allows you to manage your dependencies. More details can be found [here](https://github.com/microsoft/vscode-java-dependency#manage-dependencies).
+## Features
+- User registration & login
+- Password change
+- Recipe CRUD
+- Dashboard UI
