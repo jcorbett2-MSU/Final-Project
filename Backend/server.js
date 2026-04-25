@@ -1,12 +1,11 @@
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 
 const app = express();
 const PORT = 3000;
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
 const recipeRoutes = require("./routes/recipes");
 const authRoutes = require("./routes/auth");
@@ -14,11 +13,10 @@ const authRoutes = require("./routes/auth");
 app.use("/api/recipes", recipeRoutes);
 app.use("/api/auth", authRoutes);
 
-app.listen(PORT, () => 
-    {
-        console.log(`Final Project Server running at http://localhost:${PORT}`);
-    })
-
 app.get("/", (req, res) => {
-    res.send("Final Project API is running.");
+  res.send("API running");
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });

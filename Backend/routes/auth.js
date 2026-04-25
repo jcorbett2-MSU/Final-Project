@@ -1,52 +1,60 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../db");
-const bycrypt = require("bycrypt");
+const bcrypt = require("bcrypt");
 
-router.post("/register", async (requestAnimationFrame, res) => {
-    const { username, password } = requestAnimationFrame.body;
+router.post("/register", async (req, res) => {
+  const { username, password } = req.body;
 
-    const hashedPassword = await bycrypt.hash(password, 10);
+  if (!username || !password) {
+    return res.status(400).json({ error: "Missing fields" });
+  }
 
-    const sql = `INSERT INTO users (username, password) VALUES (?, ?)`;
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    db.run(sql, [username, hashedPassword], function (err) {
-        if(err) return res.status(500).json({ error: err.message });
+  db.run(
+    "INSERT INTO users (username, password) VALUES (?, ?)",
+    [username, hashedPassword],
+    function (err) {
+      if (err) {
+        return res.status(500).json({ error: "User already exists" });
+      }
 
-        res.json({ message: "User registered "});
-    });
+      res.json({ message: "User created" });
+    }
+  );
 });
 
 router.post("/login", (req, res) => {
-    const { username, password } = req.body;
+  const { username, password } = req.body;
 
-    const sql = `SELECT * FROM users WHERE username = ?`;
+  db.get("SELECT * FROM users WHERE username = ?", [username], async (err, user) => {
+    if (err) return res.status(500).json({ error: err.message });
 
-    db.get(sql, [username], async (err, user) => {
-        if (err) return res.status(500).json({ error: err.message });
+    if (!user) return res.status(400).json({ error: "User not found" });
 
-        if(!user) return res.status(400).json({ error: "User not found."});
+    const match = await bcrypt.compare(password, user.password);
 
-        const valid = await bycrypt.compare(password, user.password);
+    if (!match) return res.status(400).json({ error: "Invalid password" });
 
-        if (!valid) return res.status(400).json({ error: "Invalid password." });
-
-        res.json({ message: "Login successful.", userId: user.id });
-    });
+    res.json({ message: "Login success", userId: user.id });
+  });
 });
 
 router.put("/change-password", async (req, res) => {
-    const { username, newPassword } = req.body;
+  const { username, newPassword } = req.body;
 
-    const hashedPassword = await bycrypt.hash(newPassword, 10);
+  const hashed = await bcrypt.hash(newPassword, 10);
 
-    const sql = `UPDATE users SET password = ? WHERE username = ?`;
+  db.run(
+    "UPDATE users SET password = ? WHERE username = ?",
+    [hashed, username],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
 
-    db.run(sql, [hashedPassword, username], function (err) {
-        if (err) return res.status(500).json({ error: err.message });
-
-        res.json({ message: "Password updated."});
-    });
+      res.json({ message: "Password updated" });
+    }
+  );
 });
 
 module.exports = router;

@@ -2,24 +2,40 @@ import { useState } from "react";
 import axios from "axios";
 
 export default function Register() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
 
-    const handleSubmit = async (e) => {
-        await axios.post("http://localhost:3000/api/auth/register", {
-            username,
-            password,
-        });
+  const handleRegister = async (e) => {
+    e.preventDefault();
 
-        alert("User created!");
-    };
+    try {
+      await axios.post("http://localhost:3000/api/auth/register", {
+        username,
+        password
+      });
 
-    return (
-        <div>
+      alert("User created! Now go login.");
+    } catch (err) {
+      alert(err.response?.data?.error || "Error creating user");
+    }
+  };
+
+  return (
+    <form onSubmit={handleRegister}>
       <h2>Register</h2>
-      <input onChange={e => setUsername(e.target.value)} placeholder="Username" />
-      <input type="password" onChange={e => setPassword(e.target.value)} placeholder="Password" />
-      <button onClick={handleRegister}>Register</button>
-    </div>
-    );
+
+      <input
+        placeholder="Username"
+        onChange={(e) => setUsername(e.target.value)}
+      />
+
+      <input
+        type="password"
+        placeholder="Password"
+        onChange={(e) => setPassword(e.target.value)}
+      />
+
+      <button type="submit">Register</button>
+    </form>
+  );
 }
