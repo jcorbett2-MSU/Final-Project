@@ -8,34 +8,38 @@ export default function Register() {
   const handleRegister = async (e) => {
     e.preventDefault();
 
+    if (!username || !password) {
+      alert("All fields required");
+      return;
+    }
+
+    if (password.length < 4) {
+      alert("Password must be at least 4 characters");
+      return;
+    }
+
     try {
       await axios.post("http://localhost:3000/api/auth/register", {
         username,
         password
       });
 
-      alert("User created! Now go login.");
+      alert("Account created!");
+      window.location.href = "/";
     } catch (err) {
-      alert(err.response?.data?.error || "Error creating user");
+      alert(err.response?.data?.error);
     }
   };
 
   return (
-    <form onSubmit={handleRegister}>
+    <div className="container">
       <h2>Register</h2>
 
-      <input
-        placeholder="Username"
-        onChange={(e) => setUsername(e.target.value)}
-      />
-
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-
-      <button type="submit">Register</button>
-    </form>
+      <form onSubmit={handleRegister}>
+        <input onChange={e => setUsername(e.target.value)} placeholder="Username" />
+        <input type="password" onChange={e => setPassword(e.target.value)} placeholder="Password" />
+        <button type="submit">Register</button>
+      </form>
+    </div>
   );
 }

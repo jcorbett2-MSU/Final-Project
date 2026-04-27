@@ -17,3 +17,11 @@ npm run dev
 - Password change
 - Recipe CRUD
 - Dashboard UI
+
+## Testing
+1. Register user
+2. Login
+3. Add recipe
+4. Delete recipe
+5. Change password
+6. Logout and login again

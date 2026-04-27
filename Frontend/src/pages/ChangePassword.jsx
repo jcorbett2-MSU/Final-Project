@@ -1,11 +1,17 @@
 import { useState } from "react";
 import axios from "axios";
+import Navbar from "../components/Navbar";
 
 export default function ChangePassword() {
   const [newPassword, setNewPassword] = useState("");
 
   const handleChange = async (e) => {
     e.preventDefault();
+
+    if (!newPassword) {
+      alert("Enter new password");
+      return;
+    }
 
     const username = localStorage.getItem("username");
 
@@ -18,10 +24,16 @@ export default function ChangePassword() {
   };
 
   return (
-    <form onSubmit={handleChange}>
-      <h2>Change Password</h2>
-      <input type="password" onChange={e => setNewPassword(e.target.value)} />
-      <button type="submit">Update</button>
-    </form>
+    <div>
+      <Navbar />
+      <div className="container">
+        <h2>Change Password</h2>
+
+        <form onSubmit={handleChange}>
+          <input type="password" onChange={e => setNewPassword(e.target.value)} />
+          <button type="submit">Update</button>
+        </form>
+      </div>
+    </div>
   );
 }
