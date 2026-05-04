@@ -5,13 +5,23 @@ import Dashboard from "./pages/Dashboard";
 import ChangePassword from "./pages/ChangePassword";
 
 function App() {
+  const isLoggedIn = localStorage.getItem("userId");
+
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />   // ✅ MUST be Dashboard
-        <Route path="/change-password" element={<ChangePassword />} />
+
+        <Route
+          path="/dashboard"
+          element={isLoggedIn ? <Dashboard /> : <Login />}
+        />
+
+        <Route
+          path="/change-password"
+          element={isLoggedIn ? <ChangePassword /> : <Login />}
+        />
       </Routes>
     </BrowserRouter>
   );

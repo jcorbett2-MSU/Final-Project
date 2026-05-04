@@ -4,60 +4,111 @@ import Navbar from "../components/Navbar";
 
 export default function Dashboard() {
   const [recipes, setRecipes] = useState([]);
+  const [filtered, setFiltered] = useState([]);
+
   const [title, setTitle] = useState("");
   const [ingredients, setIngredients] = useState("");
   const [instructions, setInstructions] = useState("");
   const [category, setCategory] = useState("");
 
-  // Load recipes on page load
+  const [search, setSearch] = useState("");
+  const [filterCategory, setFilterCategory] = useState("");
+
+  const [editId, setEditId] = useState(null);
+
   useEffect(() => {
     loadRecipes();
   }, []);
 
   const loadRecipes = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/api/recipes");
-      setRecipes(res.data);
-    } catch (err) {
-      console.error(err);
-    }
+    const res = await axios.get("http://localhost:3000/api/recipes");
+    setRecipes(res.data);
+    setFiltered(res.data);
   };
 
-  const addRecipe = async () => {
+  useEffect(() => {
+    let results = recipes;
+
+    if (search) {
+      results = results.filter(r =>
+        r.title.toLowerCase().includes(search.toLowerCase())
+      );
+    }
+
+    if (filterCategory) {
+      results = results.filter(r =>
+        r.category.toLowerCase().includes(filterCategory.toLowerCase())
+      );
+    }
+
+    setFiltered(results);
+  }, [search, filterCategory, recipes]);
+
+  const handleSubmit = async () => {
     if (!title || !ingredients || !instructions) {
-      alert("Please fill out all required fields");
+      alert("All fields are required");
+      return;
+    }
+
+    if (title.length < 3) {
+      alert("Title must be at least 3 characters");
+      return;
+    }
+
+    if (ingredients.length < 5) {
+      alert("Ingredients too short");
+      return;
+    }
+
+    if (instructions.length < 5) {
+      alert("Instructions too short");
       return;
     }
 
     try {
-      await axios.post("http://localhost:3000/api/recipes", {
-        userId: localStorage.getItem("userId"),
-        title,
-        ingredients,
-        instructions,
-        category
-      });
+      if (editId) {
+        await axios.put(`http://localhost:3000/api/recipes/${editId}`, {
+          title,
+          ingredients,
+          instructions,
+          category
+        });
+      } else {
+        await axios.post("http://localhost:3000/api/recipes", {
+          userId: localStorage.getItem("userId"),
+          title,
+          ingredients,
+          instructions,
+          category
+        });
+      }
 
-      // Clear inputs
-      setTitle("");
-      setIngredients("");
-      setInstructions("");
-      setCategory("");
-
+      resetForm();
       loadRecipes();
     } catch (err) {
-      console.error(err);
-      alert("Error adding recipe");
+      alert("Error saving recipe");
     }
   };
 
+  const resetForm = () => {
+    setTitle("");
+    setIngredients("");
+    setInstructions("");
+    setCategory("");
+    setEditId(null);
+  };
+
   const deleteRecipe = async (id) => {
-    try {
-      await axios.delete(`http://localhost:3000/api/recipes/${id}`);
-      loadRecipes();
-    } catch (err) {
-      console.error(err);
-    }
+    await axios.delete(`http://localhost:3000/api/recipes/${id}`);
+    loadRecipes();
+  };
+
+  const startEdit = (recipe) => {
+    setEditId(recipe.id);
+    setTitle(recipe.title);
+    setIngredients(recipe.ingredients);
+    setInstructions(recipe.instructions);
+    setCategory(recipe.category);
   };
 
   return (
@@ -67,8 +118,19 @@ export default function Dashboard() {
       <div className="container">
         <h2>Dashboard</h2>
 
-        {/* Add Recipe Form */}
-        <h3>Add New Recipe</h3>
+        <input
+          placeholder="Search recipes..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+
+        <input
+          placeholder="Filter by category..."
+          value={filterCategory}
+          onChange={(e) => setFilterCategory(e.target.value)}
+        />
+
+        <h3>{editId ? "Edit Recipe" : "Add Recipe"}</h3>
 
         <input
           placeholder="Title"
@@ -89,40 +151,25 @@ export default function Dashboard() {
         />
 
         <input
-          placeholder="Category (optional)"
+          placeholder="Category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         />
 
-        <button onClick={addRecipe}>Add Recipe</button>
+        <button onClick={handleSubmit}>
+          {editId ? "Update Recipe" : "Add Recipe"}
+        </button>
 
-        {/* Recipe List */}
-        <h3>Your Recipes</h3>
+        {filtered.map((r) => (
+          <div key={r.id} style={{ marginTop: "15px" }}>
+            <strong>{r.title}</strong>
 
-        {recipes.length === 0 ? (
-          <p>No recipes yet.</p>
-        ) : (
-          recipes.map((recipe) => (
-            <div
-              key={recipe.id}
-              style={{
-                border: "1px solid #ccc",
-                padding: "10px",
-                marginTop: "10px",
-                borderRadius: "5px"
-              }}
-            >
-              <h4>{recipe.title}</h4>
-              <p><strong>Ingredients:</strong> {recipe.ingredients}</p>
-              <p><strong>Instructions:</strong> {recipe.instructions}</p>
-              <p><strong>Category:</strong> {recipe.category}</p>
-
-              <button onClick={() => deleteRecipe(recipe.id)}>
-                Delete
-              </button>
+            <div>
+              <button onClick={() => startEdit(r)}>Edit</button>
+              <button onClick={() => deleteRecipe(r.id)}>Delete</button>
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
     </div>
   );
